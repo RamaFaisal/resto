@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,6 +15,11 @@ class MyApp extends StatelessWidget {
 }
 
 class RestoProfilePage extends StatelessWidget {
+  final String email = "dadarberedar@gmail.com";
+  final String phoneNumber = "08123456789";
+  final double latitude = -6.982843;
+  final double longitude = 110.409429;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,11 +49,14 @@ class RestoProfilePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  btnContact(Icons.email, Colors.blue),
+                  btnContact(
+                      Icons.email, Colors.blue, () => _launchEmail(email)),
                   SizedBox(width: 32),
-                  btnContact(Icons.location_on, Colors.red),
+                  btnContact(Icons.location_on, Colors.red,
+                      () => _launchMap(latitude, longitude)),
                   SizedBox(width: 32),
-                  btnContact(Icons.phone, Colors.green),
+                  btnContact(Icons.phone, Colors.green,
+                      () => _launchPhone(phoneNumber)),
                 ],
               ),
               SizedBox(height: 16),
@@ -107,7 +116,7 @@ class RestoProfilePage extends StatelessWidget {
     );
   }
 
-  Widget btnContact(IconData icon, var color) {
+  Widget btnContact(IconData icon, var color, VoidCallback onPressed) {
     return Expanded(
       child: ElevatedButton(
         onPressed: () {},
@@ -123,5 +132,47 @@ class RestoProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _launchEmail(String email) async {
+    final Uri params = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: 'subject=Tanya Seputar Resto',
+    );
+
+    print('Launching email: $params'); // Tambahkan log
+
+    if (await canLaunchUrl(params)) {
+      await launchUrl(params, mode: LaunchMode.externalApplication);
+    } else {
+      print('Could not launch $params');
+    }
+  }
+
+  void _launchPhone(String phoneNumber) async {
+    final Uri params = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    if (await canLaunchUrl(params)) {
+      await launchUrl(params);
+    } else {
+      throw 'Could not launch $params';
+    }
+  }
+
+  void _launchMap(double latitude, double longitude) async {
+    final Uri params = Uri(
+      scheme: 'https',
+      host: 'www.google.com',
+      path: '/maps/search/',
+      queryParameters: {'api': '1', 'query': '$latitude,$longitude'},
+    );
+    if (await canLaunchUrl(params)) {
+      await launchUrl(params);
+    } else {
+      throw 'Could not launch $params';
+    }
   }
 }
